@@ -4,6 +4,8 @@
 
 Репозиторий моделирует пользователей, продуктовые события, подписки, платежи, маркетинг, эксперименты и инциденты. Все данные, эффекты экспериментов и бизнес-сценарии синтетические: проект показывает архитектуру и воспроизводимый код, но не описывает реальную компанию и не заявляет production SLA.
 
+![Демонстрация платформы: Superset, Airflow и Greenplum](docs/demo.gif)
+
 ## Что демонстрирует проект
 
 - Product Analytics: activation, funnel, retention, cohorts и продуктовые метрики;
@@ -74,7 +76,7 @@ flowchart TD
 
 Payment success rate в разрезе времени, платформы и версии приложения. Синтетический сценарий локализует ухудшение в Android 3.7.0.
 
-Конфигурация BI находится в [`bi/superset`](bi/superset/README.md). Идемпотентный bootstrap создаёт подключение к Greenplum, 6 datasets, 10 charts и 5 dashboards.
+Конфигурация BI находится в [`bi/superset`](bi/superset/README.md). Идемпотентный bootstrap создаёт подключение к Greenplum, 6 datasets, 10 charts и 5 dashboards. После запуска stack скриншоты пересобираются командой `python scripts/capture_superset.py`, а пятисекундная анимация — `python scripts/capture_demo.py`.
 
 ## Data Architecture
 
