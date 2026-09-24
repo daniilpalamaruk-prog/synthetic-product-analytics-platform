@@ -1,0 +1,10 @@
+"""Local Docker configuration; secrets and DSNs are injected through .env."""
+
+import os
+
+SECRET_KEY = os.environ["SUPERSET_SECRET_KEY"]
+SQLALCHEMY_DATABASE_URI = os.environ["SUPERSET_DATABASE_URI"]
+WTF_CSRF_ENABLED = True
+TALISMAN_ENABLED = False
+ENABLE_PROXY_FIX = True
+

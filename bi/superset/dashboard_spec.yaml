@@ -1,0 +1,25 @@
+version: 1
+database: Greenplum
+schema: marts
+disclosure: All metrics, incidents and targets shown here are synthetic.
+dashboards:
+  executive:
+    datasets: [revenue_daily, product_daily, acquisition]
+    metrics: [net_revenue_usd, active_users, paid_users, arppu_usd, activated_users, ltv_cac]
+  retention:
+    datasets: [retention_cohort]
+    dimensions: [cohort_month, acquisition_channel, age_day]
+    metrics: [retained_users, d1, d7, d30, d90]
+  acquisition:
+    datasets: [acquisition]
+    dimensions: [acquisition_channel]
+    metrics: [registrations, cac_usd, observed_contribution_ltv_usd, ltv_cac]
+  experiments:
+    datasets: [experiments]
+    metrics: [sample_size, checkout_conversion, paid_conversion]
+    annotations: [formal_uncertainty_from_experiment_report, primary, secondary, guardrail, exploratory, no_automatic_winner]
+  incident:
+    datasets: [platform_quality]
+    dimensions: [event_date, device_type, app_version]
+    metrics: [payment_attempts, payment_success_rate]
+    filters: {device_type: android, app_version: 3.7.0}

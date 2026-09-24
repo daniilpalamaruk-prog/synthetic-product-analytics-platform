@@ -1,0 +1,133 @@
+name: synthetic-saas-analytics
+
+services:
+  airflow-db:
+    image: postgres:16-alpine
+    profiles: [core, full]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-analytics}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?copy .env.example to .env and set POSTGRES_PASSWORD}
+      POSTGRES_DB: airflow_metadata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-analytics}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    volumes: [airflow_metadata_data:/var/lib/postgresql/data]
+
+  superset-db:
+    image: postgres:16-alpine
+    profiles: [bi, full]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-analytics}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?copy .env.example to .env and set POSTGRES_PASSWORD}
+      POSTGRES_DB: superset_metadata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-analytics} -d superset_metadata"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    volumes: [superset_metadata_data:/var/lib/postgresql/data]
+
+  airflow-init:
+    image: apache/airflow:2.10.5-python3.11
+    profiles: [core, full]
+    depends_on:
+      airflow-db: {condition: service_healthy}
+    environment: &airflow-env
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER:-analytics}:${POSTGRES_PASSWORD}@airflow-db:5432/airflow_metadata
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+      PII_HMAC_SECRET: ${PII_HMAC_SECRET:?set PII_HMAC_SECRET in .env}
+      PII_ENCRYPTION_KEY: ${PII_ENCRYPTION_KEY:-}
+      AIRFLOW_ADMIN_USER: ${AIRFLOW_ADMIN_USER:-admin}
+      AIRFLOW_ADMIN_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD:?set AIRFLOW_ADMIN_PASSWORD in .env}
+      SYNTHETIC_DATASET: /opt/airflow/data/small
+      WAREHOUSE_DATABASE: /opt/airflow/data/warehouse.db
+    volumes: &airflow-volumes
+      - ./:/opt/airflow/repo
+      - ./airflow/dags:/opt/airflow/dags
+      - ./data:/opt/airflow/data
+    working_dir: /opt/airflow/repo
+    command: >-
+      bash -c "pip install -q -e . && airflow db migrate &&
+      airflow users create --username $${AIRFLOW_ADMIN_USER}
+      --password $${AIRFLOW_ADMIN_PASSWORD}
+      --firstname Local --lastname Admin --role Admin --email local@example.test || true"
+
+  airflow-webserver:
+    image: apache/airflow:2.10.5-python3.11
+    profiles: [core, full]
+    depends_on:
+      airflow-init: {condition: service_completed_successfully}
+    environment: *airflow-env
+    volumes: *airflow-volumes
+    working_dir: /opt/airflow/repo
+    command: bash -c "pip install -q -e . && airflow webserver"
+    # 8081 avoids a common collision with local PostgreSQL/EnterpriseDB tools on Windows.
+    ports: ["${AIRFLOW_PORT:-8081}:8080"]
+
+  airflow-scheduler:
+    image: apache/airflow:2.10.5-python3.11
+    profiles: [core, full]
+    depends_on:
+      airflow-init: {condition: service_completed_successfully}
+    environment: *airflow-env
+    volumes: *airflow-volumes
+    working_dir: /opt/airflow/repo
+    command: bash -c "pip install -q -e . && airflow scheduler"
+
+  greenplum:
+    image: ghcr.io/woblerr/greenplum:7.1.0
+    hostname: greenplum
+    profiles: [greenplum, bi, full]
+    environment:
+      GREENPLUM_PASSWORD: ${GREENPLUM_PASSWORD:?set GREENPLUM_PASSWORD in .env}
+      GREENPLUM_DATABASE_NAME: synthetic_saas
+      GREENPLUM_DEPLOYMENT: singlenode
+    ports: ["5433:5432"]
+    volumes:
+      - greenplum_data:/data
+      # This image chowns init scripts on every start, so individual mounts must be writable.
+      - ./sql/greenplum/ddl/00_schemas.sql:/docker-entrypoint-initdb.d/00_schemas.sql
+      - ./sql/greenplum/ddl/01_raw.sql:/docker-entrypoint-initdb.d/01_raw.sql
+      - ./sql/greenplum/ddl/02_staging_core.sql:/docker-entrypoint-initdb.d/02_staging_core.sql
+      - ./docker/greenplum-init/03_mart_tables.sql:/docker-entrypoint-initdb.d/03_mart_tables.sql
+      - ./docker/greenplum-init/04_demo_data.sql:/docker-entrypoint-initdb.d/04_demo_data.sql
+    healthcheck:
+      # Ready only after init SQL and deterministic demo marts have completed.
+      test: ["CMD-SHELL", "gosu gpadmin /usr/local/greenplum-db/bin/psql -d synthetic_saas -Atqc 'SELECT EXISTS (SELECT 1 FROM marts.product_daily)' | grep -qx t"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  superset:
+    image: apache/superset:4.1.1
+    profiles: [bi, full]
+    depends_on:
+      superset-db: {condition: service_healthy}
+      greenplum: {condition: service_healthy}
+    environment:
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY:?set SUPERSET_SECRET_KEY in .env}
+      SUPERSET_CONFIG_PATH: /app/bootstrap/superset_config.py
+      SUPERSET_DATABASE_URI: postgresql+psycopg2://${POSTGRES_USER:-analytics}:${POSTGRES_PASSWORD}@superset-db:5432/superset_metadata
+      SUPERSET_ADMIN_USER: ${SUPERSET_ADMIN_USER:-admin}
+      SUPERSET_ADMIN_PASSWORD: ${SUPERSET_ADMIN_PASSWORD:?set SUPERSET_ADMIN_PASSWORD in .env}
+      GREENPLUM_PASSWORD: ${GREENPLUM_PASSWORD:?set GREENPLUM_PASSWORD in .env}
+    volumes:
+      - ./bi/superset:/app/bootstrap:ro
+    command: >-
+      /bin/bash -c "pip install -q psycopg2-binary==2.9.10 && superset db upgrade &&
+      superset fab create-admin --username $${SUPERSET_ADMIN_USER}
+      --password $${SUPERSET_ADMIN_PASSWORD} --firstname Local --lastname Admin
+      --email local@example.test || true && superset init &&
+      python /app/bootstrap/bootstrap.py && gunicorn
+      --bind 0.0.0.0:8088 'superset.app:create_app()'"
+    ports: ["8088:8088"]
+
+volumes:
+  airflow_metadata_data:
+  superset_metadata_data:
+  greenplum_data:

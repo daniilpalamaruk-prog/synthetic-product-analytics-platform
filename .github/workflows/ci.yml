@@ -1,0 +1,21 @@
+name: CI
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11", cache: pip}
+      - run: pip install -r requirements.txt ruff
+      - run: ruff check src tests analysis validation airflow/dags
+      - run: pytest -q
+      - name: Lightweight source-to-mart smoke test
+        env:
+          PII_HMAC_SECRET: ci-only-synthetic-secret-32-bytes
+        run: |
+          python generate.py --users 120 --target-events 2400 --seed 42 --output /tmp/saas-smoke --inject-data-quality-issues false
+          python quality.py --input /tmp/saas-smoke --layer clean
+          python warehouse.py --input /tmp/saas-smoke --database /tmp/warehouse.db
