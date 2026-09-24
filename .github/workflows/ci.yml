@@ -10,8 +10,8 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: "3.11", cache: pip}
       - run: pip install -r requirements.txt ruff
-      - run: ruff check src tests analysis validation airflow/dags
-      - run: pytest -q
+      - run: ruff check src tests analysis validation airflow/dags scripts
+      - run: python -m pytest -q
       - name: Lightweight source-to-mart smoke test
         env:
           PII_HMAC_SECRET: ci-only-synthetic-secret-32-bytes
