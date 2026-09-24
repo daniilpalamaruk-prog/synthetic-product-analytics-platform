@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "users",
+  "type": "object",
+  "required": ["user_id", "registration_at", "country", "device_type", "acquisition_channel", "name", "email", "phone", "ip_address"],
+  "properties": {
+    "user_id": {"type": "string", "format": "uuid"},
+    "device_type": {"enum": ["web", "ios", "android"]},
+    "acquisition_channel": {"enum": ["organic", "google_ads", "meta_ads", "tiktok", "youtube", "referral", "partners"]},
+    "initial_plan": {"enum": ["free", "basic", "pro"]},
+    "name": {"type": "string", "pattern": "^Synthetic User "},
+    "email": {"type": "string", "pattern": "@example\\.test$"},
+    "phone": {"type": "string"},
+    "ip_address": {"type": "string", "pattern": "^192\\.0\\.2\\."}
+  },
+  "additionalProperties": true
+}

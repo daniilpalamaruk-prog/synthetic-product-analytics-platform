@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "payments",
+  "type": "object",
+  "required": ["payment_id", "user_id", "subscription_id", "payment_at", "amount", "amount_local", "amount_usd", "currency", "fx_rate_to_usd", "status", "refund_amount", "refund_amount_local", "refund_amount_usd"],
+  "properties": {
+    "payment_id": {"type": "string", "format": "uuid"},
+    "user_id": {"type": "string", "format": "uuid"},
+    "subscription_id": {"type": "string", "format": "uuid"},
+    "amount": {"type": "number", "minimum": 0},
+    "amount_local": {"type": "number", "minimum": 0},
+    "amount_usd": {"type": "number", "minimum": 0},
+    "fx_rate_to_usd": {"type": "number", "exclusiveMinimum": 0},
+    "status": {"enum": ["success", "failed", "refunded"]},
+    "refund_amount": {"type": "number", "minimum": 0},
+    "refund_amount_local": {"type": "number", "minimum": 0},
+    "refund_amount_usd": {"type": "number", "minimum": 0}
+  },
+  "additionalProperties": true
+}

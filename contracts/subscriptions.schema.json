@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "subscriptions",
+  "type": "object",
+  "required": ["subscription_id", "user_id", "plan", "started_at", "monthly_price", "currency", "monthly_price_local", "monthly_price_usd", "status"],
+  "properties": {
+    "subscription_id": {"type": "string", "format": "uuid"},
+    "user_id": {"type": "string", "format": "uuid"},
+    "plan": {"enum": ["free", "basic", "pro"]},
+    "monthly_price": {"type": "number", "minimum": 0},
+    "currency": {"enum": ["USD", "GBP", "EUR", "BRL", "INR", "CAD"]},
+    "monthly_price_local": {"type": "number", "minimum": 0},
+    "monthly_price_usd": {"type": "number", "minimum": 0},
+    "status": {"enum": ["active", "cancelled", "past_due"]}
+  },
+  "description": "Cross-field rule enforced in DQ: ended_at must be null or >= started_at.",
+  "additionalProperties": true
+}

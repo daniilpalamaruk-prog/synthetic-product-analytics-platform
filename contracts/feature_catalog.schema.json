@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "title": "feature_catalog", "type": "object",
+  "required": ["feature_name", "category", "available_on_plan", "release_date"],
+  "properties": {
+    "feature_name": {"type": "string"}, "category": {"enum": ["core", "engagement", "power"]},
+    "available_on_plan": {"enum": ["free", "basic", "pro"]}
+  }, "description": "Primary key feature_name.", "additionalProperties": true
+}

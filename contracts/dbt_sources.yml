@@ -1,0 +1,128 @@
+version: 2
+
+sources:
+  - name: synthetic_saas
+    description: "Synthetic portfolio data; not a real production source."
+    schema: raw
+    tables:
+      - name: users
+        columns:
+          - name: user_id
+            data_type: string
+            tests: [not_null, unique]
+          - name: acquisition_channel
+            tests:
+              - accepted_values:
+                  values: [organic, google_ads, meta_ads, tiktok, youtube, referral, partners]
+      - name: events
+        loaded_at_field: event_time
+        freshness:
+          warn_after: {count: 1, period: hour}
+          error_after: {count: 3, period: hour}
+        columns:
+          - name: event_id
+            data_type: string
+            tests: [not_null, unique]
+          - name: user_id
+            tests:
+              - relationships: {to: "source('synthetic_saas', 'users')", field: user_id}
+          - name: event_name
+            tests:
+              - accepted_values:
+                  values: [ad_impression, ad_click, signup, onboarding_started, onboarding_step_completed, onboarding_completed, login, feature_viewed, feature_used, trial_started, checkout_started, payment_attempted, payment_success, payment_failed, subscription_started, subscription_renewed, subscription_cancelled, refund_requested, refund_completed, notification_disabled]
+      - name: subscriptions
+        columns:
+          - name: subscription_id
+            tests: [not_null, unique]
+          - name: user_id
+            tests:
+              - relationships: {to: "source('synthetic_saas', 'users')", field: user_id}
+          - name: plan
+            tests:
+              - accepted_values: {values: [free, basic, pro]}
+      - name: payments
+        columns:
+          - name: payment_id
+            tests: [not_null, unique]
+          - name: subscription_id
+            tests:
+              - relationships: {to: "source('synthetic_saas', 'subscriptions')", field: subscription_id}
+          - name: amount
+            tests:
+              - dbt_utils.expression_is_true: {expression: ">= 0"}
+      - name: sessions
+        columns:
+          - name: session_id
+            tests: [not_null, unique]
+          - name: user_id
+            tests:
+              - relationships: {to: "source('synthetic_saas', 'users')", field: user_id}
+      - name: marketing_spend
+        columns:
+          - name: channel
+            tests:
+              - accepted_values: {values: [organic, google_ads, meta_ads, tiktok, youtube, referral, partners]}
+          - name: spend_usd
+            tests:
+              - dbt_utils.expression_is_true: {expression: ">= 0"}
+      - name: fx_rates
+        tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [date, currency]
+        columns:
+          - name: rate_to_usd
+            tests:
+              - dbt_utils.expression_is_true: {expression: "> 0"}
+      - name: experiments
+        columns:
+          - name: experiment_id
+            tests: [not_null, unique]
+      - name: experiment_assignments
+        tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [experiment_id, user_id]
+        columns:
+          - name: experiment_id
+            tests:
+              - relationships: {to: "source('synthetic_saas', 'experiments')", field: experiment_id}
+          - name: user_id
+            tests:
+              - relationships: {to: "source('synthetic_saas', 'users')", field: user_id}
+      - name: feature_catalog
+        columns:
+          - name: feature_name
+            tests: [not_null, unique]
+          - name: available_on_plan
+            tests:
+              - accepted_values: {values: [free, basic, pro]}
+      - name: app_releases
+        tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [platform, app_version, released_at]
+        columns:
+          - name: platform
+            tests:
+              - accepted_values: {values: [web, ios, android]}
+      - name: generator_config
+        columns:
+          - name: config_id
+            tests: [not_null, unique]
+          - name: gross_margin
+            tests:
+              - dbt_utils.accepted_range: {min_value: 0.70, max_value: 0.85, inclusive: true}
+      - name: business_timeline
+        columns:
+          - name: story_month
+            tests: [not_null]
+          - name: simulated
+            tests:
+              - accepted_values: {values: [true]}
+      - name: pipeline_runs
+        columns:
+          - name: run_id
+            tests: [not_null, unique]
+          - name: logical_date
+            tests: [not_null, unique]
+          - name: simulated
+            tests:
+              - accepted_values: {values: [true]}

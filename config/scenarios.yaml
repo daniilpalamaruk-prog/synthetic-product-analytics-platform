@@ -1,0 +1,32 @@
+monthly_acquisition_multipliers: [0.75, 0.78, 0.92, 1.35, 1.32, 1.38, 1.40, 1.36, 1.42, 1.45, 1.28, 1.31]
+
+timeline:
+  tiktok_growth_start_month: 3
+  budget_reallocation_month: 11
+  onboarding_release_month: 5
+  pricing_page_release_month: 9
+  retention_improvement_month: 12
+
+android_incident:
+  start_day: 181
+  duration_days: 12
+  affected_version: "3.7.0"
+  fixed_version: "3.8.1"
+  normal_payment_success: 0.70
+  incident_payment_success: 0.30
+
+experiment_windows:
+  onboarding: {start_day: 151, end_day: 210}
+  pricing: {start_day: 273, end_day: 321}
+  notifications: {start_day: 304, end_day: 364}
+
+experiment_enrollment:
+  mode: mutually_exclusive
+
+sla:
+  daily_availability_hour_utc: 7
+  freshness_minutes: 60
+  completeness_ratio: 0.99
+  max_pipeline_duration_minutes: 45
+  allowed_delay_minutes: 180
+  target_success_rate: 0.995

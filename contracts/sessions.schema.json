@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "title": "sessions", "type": "object",
+  "required": ["session_id", "user_id", "session_started_at", "session_ended_at", "device_type"],
+  "properties": {
+    "session_id": {"type": "string", "format": "uuid"}, "user_id": {"type": "string", "format": "uuid"},
+    "device_type": {"enum": ["web", "ios", "android"]}, "app_version": {"type": "string"}
+  },
+  "description": "Cross-field rule: session_ended_at >= session_started_at; user_id references users.",
+  "additionalProperties": true
+}

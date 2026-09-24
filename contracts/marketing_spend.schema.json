@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "title": "marketing_spend", "type": "object",
+  "required": ["date", "channel", "campaign_id", "country", "currency", "impressions", "clicks", "spend", "spend_local", "fx_rate_to_usd", "spend_usd", "attributed_signups"],
+  "properties": {
+    "channel": {"enum": ["organic", "google_ads", "meta_ads", "tiktok", "youtube", "referral", "partners"]},
+    "impressions": {"type": "integer", "minimum": 0}, "clicks": {"type": "integer", "minimum": 0},
+    "currency": {"enum": ["USD", "GBP", "EUR", "BRL", "INR", "CAD"]},
+    "spend": {"type": "number", "minimum": 0}, "spend_local": {"type": "number", "minimum": 0},
+    "spend_usd": {"type": "number", "minimum": 0}, "fx_rate_to_usd": {"type": "number", "exclusiveMinimum": 0},
+    "attributed_signups": {"type": "integer", "minimum": 0}
+  }, "additionalProperties": true
+}

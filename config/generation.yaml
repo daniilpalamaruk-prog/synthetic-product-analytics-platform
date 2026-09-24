@@ -1,0 +1,14 @@
+profiles:
+  small: {users: 10000, target_events: 400000}
+  medium: {users: 100000, target_events: 7000000}
+  large: {users: 1000000, target_events: 70000000}
+
+defaults:
+  seed: 42
+  months: 12
+  start_date: 2025-01-01
+  chunk_size: 250000
+  gross_margin: 0.78
+  inject_data_quality_issues: true
+  csv_sample: false
+

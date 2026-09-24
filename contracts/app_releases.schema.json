@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "title": "app_releases", "type": "object",
+  "required": ["app_version", "platform", "released_at", "description"],
+  "properties": {"app_version": {"type": "string"}, "platform": {"enum": ["web", "ios", "android"]}, "description": {"type": "string"}},
+  "description": "Unique platform + app_version + released_at.", "additionalProperties": true
+}

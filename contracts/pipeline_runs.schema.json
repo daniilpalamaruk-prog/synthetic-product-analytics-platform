@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "title": "pipeline_runs", "type": "object",
+  "required": ["run_id", "logical_date", "started_at", "completed_at", "source_watermark", "expected_event_rows", "actual_event_rows", "status", "simulated"],
+  "properties": {
+    "run_id": {"type": "string", "format": "uuid"},
+    "expected_event_rows": {"type": "integer", "minimum": 0},
+    "actual_event_rows": {"type": "integer", "minimum": 0},
+    "completeness_ratio": {"type": "number", "minimum": 0},
+    "duration_minutes": {"type": "integer", "minimum": 0},
+    "freshness_minutes": {"type": "integer", "minimum": 0},
+    "delay_minutes": {"type": "integer", "minimum": 0},
+    "status": {"enum": ["success", "failed_then_recovered"]},
+    "simulated": {"const": true}
+  }, "additionalProperties": true
+}
+

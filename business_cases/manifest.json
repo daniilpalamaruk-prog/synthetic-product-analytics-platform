@@ -1,0 +1,9 @@
+{
+  "synthetic": true,
+  "dataset": "removed deterministic seed-42 generated source",
+  "reports": [
+    "acquisition",
+    "android_incident",
+    "pricing"
+  ]
+}

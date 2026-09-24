@@ -1,0 +1,107 @@
+platform_distribution: {web: 0.42, ios: 0.27, android: 0.31}
+
+fx_rates:
+  base_to_usd: {USD: 1.0, GBP: 1.25, EUR: 1.08, BRL: 0.20, INR: 0.012, CAD: 0.74}
+  seasonal_amplitude: 0.015
+
+channel_mix:
+  baseline: {organic: 0.22, google_ads: 0.24, meta_ads: 0.20, tiktok: 0.01, youtube: 0.12, referral: 0.12, partners: 0.09}
+  tiktok_growth: {organic: 0.13, google_ads: 0.18, meta_ads: 0.16, tiktok: 0.32, youtube: 0.08, referral: 0.07, partners: 0.06}
+  reallocated: {organic: 0.22, google_ads: 0.22, meta_ads: 0.13, tiktok: 0.10, youtube: 0.08, referral: 0.16, partners: 0.09}
+
+channels:
+  organic:    {quality: 0.52, activation: 0.12, retention: 0.16, paid: 0.00, pro: 0.00, cpc: 0.05}
+  google_ads: {quality: 0.16, activation: 0.02, retention: 0.03, paid: 0.03, pro: 0.01, cpc: 2.80}
+  meta_ads:   {quality: 0.00, activation: 0.00, retention: 0.00, paid: 0.00, pro: 0.00, cpc: 1.65}
+  tiktok:     {quality: -0.58, activation: -0.08, retention: -0.18, paid: -0.04, pro: -0.03, cpc: 0.72}
+  youtube:    {quality: 0.10, activation: 0.01, retention: 0.03, paid: 0.00, pro: 0.00, cpc: 1.20}
+  referral:   {quality: 0.70, activation: 0.16, retention: 0.20, paid: 0.06, pro: 0.12, cpc: 0.20}
+  partners:   {quality: 0.22, activation: 0.04, retention: 0.05, paid: 0.02, pro: 0.04, cpc: 1.00}
+
+activation:
+  onboarding_base: 0.62
+  onboarding_release_effect: 0.035
+  quality_effect: 0.08
+  core_feature_base: 0.38
+  core_feature_quality_effect: 0.13
+  activated_paid_effect: 0.035
+
+retention:
+  d1_base: 0.43
+  d7_base: 0.22
+  d30_base: 0.095
+  d90_base: 0.065
+  activated_d1_effect: 0.08
+  activated_d7_effect: 0.10
+  activated_d30_effect: 0.225
+  activated_d90_effect: 0.07
+  paid_d30_effect: 0.045
+
+plans:
+  basic_price: 15.0
+  pro_price: 35.0
+  new_pricing_basic_price: 17.0
+  new_pricing_pro_price: 39.0
+  base_pro_probability: 0.28
+
+churn:
+  base_probability: 0.25
+  activated_reduction: 0.07
+  mean_months_base: 3.5
+  mean_months_activated_effect: 2.0
+
+payments:
+  renewal_failure_probability: 0.055
+  refund_probability: 0.025
+  plan_transition_probability: 0.18
+
+cohort_effects:
+  degrading_zero_based_months: [3, 6]
+  degrading_effect: -0.025
+  retention_release_effect: 0.025
+
+experiments:
+  onboarding: {completion_effect: 0.085, core_feature_effect: 0.07, d30_effect: 0.018}
+  pricing: {checkout_effect: -0.025, pro_effect: 0.08}
+  notifications: {d7_effect: 0.055, disable_probability: 0.19}
+
+experiment_analysis:
+  exp_onboarding_v2:
+    expected_split: {control: 0.5, treatment: 0.5}
+    primary_metric: onboarding_completed
+    secondary_metrics: [activation, payment_success]
+    guardrail_metrics: [d30_retention, refund_rate]
+    exploratory_metrics: [checkout_started, d7_retention]
+  exp_pricing_v2:
+    expected_split: {control: 0.5, new_pricing: 0.5}
+    primary_metric: revenue_per_assigned_user
+    secondary_metrics: [checkout_started, payment_success]
+    guardrail_metrics: [refund_rate, d30_retention]
+    exploratory_metrics: [onboarding_completed, d7_retention]
+  exp_notifications:
+    expected_split: {control: 0.5, treatment: 0.5}
+    primary_metric: d7_retention
+    secondary_metrics: [payment_success]
+    guardrail_metrics: [notification_disabled]
+    exploratory_metrics: [d30_retention, onboarding_completed]
+
+feature_effects:
+  collaboration_base_weight: 9
+  collaboration_activation_weight: 7
+  automation_base_weight: 8
+  automation_activation_weight: 5
+  analytics_base_weight: 6
+  analytics_activation_weight: 4
+
+anomalies:
+  duplicate_events: 0.003
+  null_event_user: 0.002
+  invalid_event_name: 0.001
+  impossible_event_time: 0.001
+  invalid_experiment_variant: 0.0005
+  late_event: 0.015
+  negative_payment: 0.0008
+  missing_subscription: 0.001
+  duplicate_payment: 0.002
+  unknown_campaign: 0.001
+  invalid_subscription_dates: 0.0007

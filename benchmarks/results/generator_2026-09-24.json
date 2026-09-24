@@ -1,0 +1,21 @@
+{
+  "measured_at": "2026-09-24T07:03:24.056527+00:00",
+  "synthetic_benchmark": true,
+  "environment": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.14.3",
+    "logical_cpu_count": 12
+  },
+  "parameters": {
+    "users": 10000,
+    "target_events": 400000,
+    "chunk_size": 100000,
+    "gross_margin": 0.78,
+    "inject_data_quality_issues": false
+  },
+  "elapsed_seconds": 12.639004299999215,
+  "events_per_second": 31648.062656330043,
+  "parquet_bytes": 36256362,
+  "python_tracemalloc_peak_bytes": null,
+  "note": "tracemalloc excludes some native PyArrow allocations; measure process RSS externally for capacity planning"
+}

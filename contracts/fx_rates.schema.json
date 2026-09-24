@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "title": "fx_rates", "type": "object",
+  "required": ["date", "currency", "rate_to_usd", "source", "simulated"],
+  "properties": {
+    "currency": {"enum": ["USD", "GBP", "EUR", "BRL", "INR", "CAD"]},
+    "rate_to_usd": {"type": "number", "exclusiveMinimum": 0},
+    "source": {"const": "synthetic_config"}, "simulated": {"const": true}
+  }, "additionalProperties": false
+}

@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "title": "experiments", "type": "object",
+  "required": ["experiment_id", "experiment_name", "started_at", "ended_at", "primary_metric", "status"],
+  "properties": {"experiment_id": {"type": "string"}, "status": {"enum": ["draft", "running", "completed", "stopped"]}},
+  "description": "Primary key experiment_id; ended_at must be >= started_at.", "additionalProperties": true
+}

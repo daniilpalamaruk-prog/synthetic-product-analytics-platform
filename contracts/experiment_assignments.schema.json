@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "title": "experiment_assignments", "type": "object",
+  "required": ["experiment_id", "user_id", "variant", "assigned_at"],
+  "properties": {
+    "experiment_id": {"type": "string"}, "user_id": {"type": "string", "format": "uuid"},
+    "variant": {"enum": ["control", "treatment", "new_pricing"]}
+  },
+  "description": "Unique experiment_id + user_id; both keys have referential tests; variant must belong to experiment definition.",
+  "additionalProperties": true
+}
